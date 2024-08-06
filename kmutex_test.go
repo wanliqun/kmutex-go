@@ -1,17 +1,16 @@
-package kmutex
+package kmutex_test
 
 import (
-	"math/rand"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/wanliqun/kmutex-go"
 )
 
 func TestKMutex(t *testing.T) {
-	kmutex := NewKMutex()
-	lockKey := MutexKey("kmutex")
+	km := kmutex.NewKMutex()
+	lockKey := kmutex.MutexKey("kmutex")
 
 	testNum := int64(0)
 	testTimes := int64(2000)
@@ -24,11 +23,8 @@ func TestKMutex(t *testing.T) {
 		go func() {
 			defer wg.Done()
 
-			kmutex.Lock(lockKey)
-			defer kmutex.Unlock(lockKey)
-
-			amt := time.Duration(rand.Intn(100))
-			time.Sleep(time.Millisecond * amt)
+			km.Lock(lockKey)
+			defer km.Unlock(lockKey)
 
 			testNum = testNum + 1
 		}()
@@ -41,22 +37,23 @@ func TestKMutex(t *testing.T) {
 
 // Additional test for multiple keys
 func TestKMutexMultipleKeys(t *testing.T) {
-	kmutex := NewKMutex()
-	keys := []MutexKey{"key1", "key2", "key3", "key4", "key5"}
+	km := kmutex.NewKMutex()
+	keys := []kmutex.MutexKey{"key1", "key2", "key3", "key4", "key5"}
 
 	testTimes := 1000
-	counter := make(map[MutexKey]int64)
+	counter := make(map[kmutex.MutexKey]int64)
+
 	mu := &sync.Mutex{}
 	wg := &sync.WaitGroup{}
 
 	for i := 0; i < testTimes; i++ {
 		for _, key := range keys {
 			wg.Add(1)
-			go func(k MutexKey) {
+			go func(k kmutex.MutexKey) {
 				defer wg.Done()
 
-				kmutex.Lock(k)
-				defer kmutex.Unlock(k)
+				km.Lock(k)
+				defer km.Unlock(k)
 
 				mu.Lock()
 				counter[k]++
@@ -73,11 +70,11 @@ func TestKMutexMultipleKeys(t *testing.T) {
 }
 
 func BenchmarkKMutex(b *testing.B) {
-	kmutex := NewKMutex()
-	lockKey := MutexKey("benchKey")
+	km := kmutex.NewKMutex()
+	lockKey := kmutex.MutexKey("benchKey")
 
 	for i := 0; i < b.N; i++ {
-		kmutex.Lock(lockKey)
-		kmutex.Unlock(lockKey)
+		km.Lock(lockKey)
+		km.Unlock(lockKey)
 	}
 }

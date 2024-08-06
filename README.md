@@ -21,7 +21,7 @@ package main
 
 import (
     "fmt"
-    kmutex "github.com/wanliqun/kmutex-go"
+    "github.com/wanliqun/kmutex-go"
 )
 
 func main() {
